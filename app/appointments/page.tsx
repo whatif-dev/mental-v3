@@ -35,21 +35,30 @@ export default function AppointmentsPage() {
     fetchAppointments()
   }, [])
 
-  async function fetchPatients() {
-    const { data, error } = await supabase
-      .from('patients')
-      .select('id, full_name')
-      .order('full_name', { ascending: true })
-    
-    if (error) {
-      console.error('Error fetching patients:', error)
+  const fetchPatients = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('id, full_name')
+        .order('full_name', { ascending: true })
+      
+      if (error) {
+        console.error('Error fetching patients:', error)
+        toast({
+          title: "Error",
+          content: "Failed to fetch patients. Please try again.",
+          variant: "destructive",
+        })
+      } else {
+        setPatients(data || [])
+      }
+    } catch (error) {
+      console.error('Error in fetchPatients:', error)
       toast({
         title: "Error",
-        description: "Failed to fetch patients. Please try again.",
+        content: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       })
-    } else {
-      setPatients(data || [])
     }
   }
 
