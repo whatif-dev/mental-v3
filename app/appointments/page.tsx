@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase'
 import { Pencil, UserPlus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { usePatient } from '@/contexts/PatientContext'
+import { toast } from "@/components/ui/use-toast"  // Make sure this import is correct
 
 export default function AppointmentsPage() {
   const { toast } = useToast()
@@ -36,20 +37,29 @@ export default function AppointmentsPage() {
   }, [])
 
   async function fetchPatients() {
-    const { data, error } = await supabase
-      .from('patients')
-      .select('id, full_name')
-      .order('full_name', { ascending: true })
-    
-    if (error) {
-      console.error('Error fetching patients:', error)
+    try {
+      const { data, error } = await supabase
+        .from('patients')
+        .select('id, full_name')
+        .order('full_name', { ascending: true })
+      
+      if (error) {
+        console.error('Error fetching patients:', error)
+        toast({
+          title: "Error",
+          description: "Failed to fetch patients. Please try again.",
+          variant: "destructive",
+        })
+      } else {
+        setPatients(data || [])
+      }
+    } catch (error) {
+      console.error('Error in fetchPatients:', error)
       toast({
         title: "Error",
-        description: "Failed to fetch patients. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       })
-    } else {
-      setPatients(data || [])
     }
   }
 
