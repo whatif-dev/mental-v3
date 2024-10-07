@@ -13,12 +13,18 @@ import { Pencil, UserPlus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { usePatient } from '@/contexts/PatientContext'
 
+interface Patient {
+  id: string;
+  full_name: string;
+  // Add any other properties that a patient might have
+}
+
 export default function AppointmentsPage() {
   const { toast } = useToast()
   const { selectedPatient, setSelectedPatient } = usePatient()
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [time, setTime] = useState('')
-  const [patients, setPatients] = useState([])
+  const [patients, setPatients] = useState<Patient[]>([])
   const [appointments, setAppointments] = useState([])
   const [editingAppointment, setEditingAppointment] = useState(null)
   const [newPatient, setNewPatient] = useState({
@@ -37,11 +43,7 @@ export default function AppointmentsPage() {
 
   const fetchPatients = async () => {
     try {
-      const { data, error } = await supabase
-        .from('patients')
-        .select('id, full_name')
-        .order('full_name', { ascending: true })
-      
+      const { data, error } = await supabase.from('patients').select('*')
       if (error) {
         console.error('Error fetching patients:', error)
         toast({
@@ -50,7 +52,7 @@ export default function AppointmentsPage() {
           variant: "destructive",
         })
       } else {
-        setPatients(data || [])
+        setPatients(data as Patient[] || [])
       }
     } catch (error) {
       console.error('Error in fetchPatients:', error)
